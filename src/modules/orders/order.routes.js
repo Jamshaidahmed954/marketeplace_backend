@@ -119,22 +119,16 @@ router.patch("/status/:orderId", auth, isSellerRole, updateOrderStatusController
 
 /**
  * @swagger
- * /api/orders/seller:
- *  get:
- *    summary: Get orders for the logged-in seller
- *   tags: [Orders]
- *   security:
- *    - bearerAuth: []
- *  responses:
- *   200:
- *    description: Success
- *  401:
- *   description: Unauthorized
- *  403:
- *  description: Forbidden
- *  500:
- *  description: Internal Server Error
- * */
-router.get("/sellerId", auth, isSellerRole, getOrdersBySellerIdController);
+ * /api/orders/sellerId/{sellerId}:
+ *   get:
+ *     summary: Get orders for the logged-in seller
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
+router.get("/sellerId/:sellerId", auth, isSellerRole, getOrdersBySellerIdController);
 
 export default router;
