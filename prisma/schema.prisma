@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BUYER
+  SELLER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id             String    @id @default(uuid())
+  name           String
+  description    String?
+  email          String    @unique
+  password       String
+  storeName      String?
+  phone          String?
+  role           Role      @default(BUYER)
+  isActive       Boolean   @default(true)
+  profilePicture String?
+  verified       Boolean   @default(false)
+  
+  products       Product[]
+  ordersBought   Order[]   @relation("BuyerOrders")
+  ordersSold     Order[]   @relation("SellerOrders")
+  reviews        Review[]
+  earnings       Earning[]
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+}
+
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  price       Float
+  images      String[]
+  stock       Int
+  clicks      Int?      @default(0)
+  views       Int?      @default(0)
+  sellerId    String
+  seller      User      @relation(fields: [sellerId], references: [id])
+  isActive    Boolean   @default(true)
+
+  orders      Order[]
+  reviews     Review[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  buyerId     String
+  buyer       User        @relation("BuyerOrders", fields: [buyerId], references: [id])
+  sellerId    String
+  seller      User        @relation("SellerOrders", fields: [sellerId], references: [id])
+  productId   String
+  product     Product     @relation(fields: [productId], references: [id])
+  quantity    Int         @default(1)
+  totalAmount Float
+  status      OrderStatus @default(PENDING)
+  
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Review {
+  id          String    @id @default(uuid())
+  rating      Int       // 1 to 5
+  comment     String?
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Earning {
+  id          String    @id @default(uuid())
+  sellerId    String
+  seller      User      @relation(fields: [sellerId], references: [id])
+  amount      Float
+  orderId     String    @unique // Link earning to a specific order
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
