@@ -35,7 +35,8 @@ const requireRole = (...allowedRoles) => (req, res, next) => {
 
 // Pre-built convenience guards
 const isAdminRole  = requireRole("ADMIN");
+const isBuyerRole  = requireRole("BUYER");
 const isSellerRole = requireRole("SELLER");
 const isAdminOrSeller = requireRole("ADMIN", "SELLER");
 
-export { requireRole, isAdminRole, isSellerRole, isAdminOrSeller };
+export { requireRole, isAdminRole, isBuyerRole, isSellerRole, isAdminOrSeller };

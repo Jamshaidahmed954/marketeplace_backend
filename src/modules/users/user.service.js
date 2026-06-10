@@ -23,6 +23,31 @@ const createUserService = async (userData) => {
     return user;
 };
 
+const getUserByIdService = async (userId) => {
+    const user = await prismaClient.user.findUnique({
+        where: { id: userId },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            phone: true,
+            storeName: true,
+            description: true,
+            profilePicture: true,
+            isActive: true,
+            createdAt: true
+        }
+    });
+
+    if (!user) {
+        const error = new Error("User not found");
+        error.status = 404;
+        throw error;
+    }
+    return user;
+};
+
 const updateUserService = async (userId, updateData) => {
     const existingUser = await prismaClient.user.findUnique({ where: { id: userId } });
     if (!existingUser) {
@@ -66,4 +91,4 @@ const updatePasswordService = async (userId, currentPassword, newPassword) => {
     return updatedUser;
 };
 
-export { createUserService, updateUserService, updatePasswordService };
+export { createUserService, updateUserService, updatePasswordService, getUserByIdService };

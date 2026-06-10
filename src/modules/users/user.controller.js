@@ -1,4 +1,4 @@
-import { createUserService, updateUserService, updatePasswordService } from './user.service.js';
+import { createUserService, updateUserService, updatePasswordService, getUserByIdService } from './user.service.js';
 import { registerValidation } from '../../middleware/validation.js';
 import { sendSuccess, sendError } from '../../utils/response.js';
 import logger from '../../utils/logger.js';
@@ -67,4 +67,20 @@ const updatePasswordController = async (req, res, next) => {
     }
 };
 
-export { createUserController, updateUserController, updatePasswordController };
+// ─── Get Me ───────────────────────────────────────────────────────────────
+const getMeController = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const user = await getUserByIdService(userId);
+
+        return sendSuccess(res, {
+            statusCode: 200,
+            message: "Profile fetched successfully",
+            data: user,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export { createUserController, updateUserController, updatePasswordController, getMeController };

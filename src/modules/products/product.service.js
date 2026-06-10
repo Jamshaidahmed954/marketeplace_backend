@@ -15,9 +15,24 @@ const createProductService = async (productData) => {
 const getAllProductsService = async ({ skip = 0, take = 10 } = {}) => {
     const [total, products] = await Promise.all([
         prismaClient.product.count(),
-        prismaClient.product.findMany({ skip, take }),
+        prismaClient.product.findMany({ 
+            skip, 
+            take,
+            include: {
+                category: { select: { id: true, name: true } },
+                reviews: { select: { rating: true } }
+            }
+        }),
     ]);
-    return { products, total };
+    
+    const productsWithRating = products.map(p => {
+        const averageRating = p.reviews.length > 0 
+            ? p.reviews.reduce((acc, r) => acc + r.rating, 0) / p.reviews.length 
+            : 0;
+        return { ...p, averageRating };
+    });
+
+    return { products: productsWithRating, total };
 };
 
 const updateProductService = async (productId, updateData) => {

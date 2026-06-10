@@ -1,5 +1,6 @@
 import express from "express";
-import { createUserController, updateUserController, updatePasswordController } from "./user.controller.js";
+import { createUserController, updateUserController, updatePasswordController, getMeController } from "./user.controller.js";
+import auth from "../../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -111,5 +112,20 @@ router.patch("/updateById/:id", updateUserController);
  *       200:
  *         description: Success
  */
-router.patch("/updatePassword/:id", updatePasswordController);
+router.patch("/updatePassword/:id", auth, updatePasswordController);
+
+/**
+ * @swagger
+ * /api/users/me:
+ *   get:
+ *     summary: Get the authenticated user's profile
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Success
+ */
+router.get("/me", auth, getMeController);
+
 export default router;

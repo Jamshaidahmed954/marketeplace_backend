@@ -6,7 +6,7 @@ const createProductSchema = joi.object({
     description: joi.string().optional(),
     categoryId: joi.string().required().uuid(),
     stock: joi.number().required(),
-    images: joi.array().items(joi.string().uri()).optional(),
+    images: joi.array().items(joi.string()).optional(),
     sellerId: joi.string().required().uuid(),
     isActive: joi.boolean().default(true),
 });
@@ -18,7 +18,7 @@ const updateProductSchema = joi.object({
     description: joi.string().optional(),
     categoryId: joi.string().optional().uuid(),
     stock: joi.number().optional(),
-    images: joi.array().items(joi.string().uri()).optional(),
+    images: joi.array().items(joi.string()).optional(),
     isActive: joi.boolean().optional(),
 });
 
