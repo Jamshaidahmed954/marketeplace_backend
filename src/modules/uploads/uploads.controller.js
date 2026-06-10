@@ -5,9 +5,20 @@ import upload from "./uploads.services.js";
 
 const uploadFileController = (req, res) => {
     if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
+        return res.status(400).json({ success: false, message: "No file uploaded" });
     }
-    res.status(200).json({ message: "File uploaded successfully", file: req.file });
+    
+    // Convert backslashes to forward slashes and build absolute URL
+    const fileUrl = `${req.protocol}://${req.get('host')}/${req.file.path.replace(/\\/g, '/')}`;
+    
+    res.status(200).json({ 
+        success: true, 
+        message: "File uploaded successfully", 
+        data: {
+            url: fileUrl,
+            publicId: req.file.filename
+        } 
+    });
 
 };
 

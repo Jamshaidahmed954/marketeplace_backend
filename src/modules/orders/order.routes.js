@@ -4,10 +4,11 @@ import {
     getOrdersController,
     getOrderByIdController,
     updateOrderStatusController,
-    getOrdersBySellerIdController
+    getOrdersBySellerIdController,
+    getOrdersByBuyerIdController
 } from "./order.controller.js";
 import auth from "../../middleware/auth.middleware.js";
-import { isSellerRole } from "../../middleware/role.middleware.js";
+import { isSellerRole, isBuyerRole } from "../../middleware/role.middleware.js";
 
 const router = express.Router();
 
@@ -130,5 +131,30 @@ router.patch("/status/:orderId", auth, isSellerRole, updateOrderStatusController
  *         description: Success
  */
 router.get("/sellerId/:sellerId", auth, isSellerRole, getOrdersBySellerIdController);
+
+/**
+ * @swagger
+ * /api/orders/buyerId/{buyerId}:
+ *   get:
+ *     summary: Get all orders for the authenticated buyer
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: buyerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The buyer's user ID
+ *     responses:
+ *       200:
+ *         description: List of buyer's orders with product and seller details
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden – buyer role required
+ */
+router.get("/buyerId/:buyerId", auth, isBuyerRole, getOrdersByBuyerIdController);
 
 export default router;

@@ -14,6 +14,9 @@ import logger from "../../utils/logger.js";
 // ─── Create ───────────────────────────────────────────────────────────────────
 const createProductController = async (req, res, next) => {
     try {
+        if (req.user && req.user.id) {
+            req.body.sellerId = req.user.id;
+        }
         const { error, value } = createProductSchema.validate(req.body);
         if (error) {
             return sendError(res, { statusCode: 400, message: error.details[0].message });

@@ -92,7 +92,7 @@ const getOrderByIdService = async (orderId) => {
     return order;
 };
 
-const updateOrderStatusService = async (orderId, newStatus) => {
+const updateOrderStatusService = async (orderId, newStatus, sellerId) => {
     const validStatuses = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
     if (!validStatuses.includes(newStatus)) {
         const err = new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
@@ -107,12 +107,18 @@ const updateOrderStatusService = async (orderId, newStatus) => {
         throw err;
     }
 
+    if (order.sellerId !== sellerId) {
+        const err = new Error("Unauthorized to update this order");
+        err.status = 403;
+        throw err;
+    }
+
     const updatedOrder = await prismaClient.order.update({
         where: { id: orderId },
         data: { status: newStatus }
     });
 
-    logger.info("Order status updated", { orderId, newStatus });
+    logger.info("Order status updated", { orderId, newStatus, sellerId });
     return updatedOrder;
 };
 
@@ -126,11 +132,37 @@ const getOrdersBySellerIdService = async (sellerId, { skip = 0, take = 10 } = {}
             orderBy: { createdAt: 'desc' },
             include: {
                 buyer: { select: { id: true, name: true, email: true } },
-                product: { select: { id: true, name: true, price: true } }
+                product: { select: { id: true, name: true, price: true, images: true } }
             }
         })
     ]);
     return { total, orders };
-}
+};
 
-export { createOrderService, getAllOrdersService, getOrderByIdService, updateOrderStatusService, getOrdersBySellerIdService };
+const getOrdersByBuyerIdService = async (buyerId, { skip = 0, take = 50 } = {}) => {
+    const [total, orders] = await Promise.all([
+        prismaClient.order.count({ where: { buyerId } }),
+        prismaClient.order.findMany({
+            where: { buyerId },
+            skip,
+            take,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                product: {
+                    select: {
+                        id: true,
+                        name: true,
+                        description: true,
+                        price: true,
+                        images: true,
+                        isActive: true
+                    }
+                },
+                seller: { select: { id: true, name: true, storeName: true } }
+            }
+        })
+    ]);
+    return { total, orders };
+};
+
+export { createOrderService, getAllOrdersService, getOrderByIdService, updateOrderStatusService, getOrdersBySellerIdService, getOrdersByBuyerIdService };

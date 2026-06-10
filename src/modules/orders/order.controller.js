@@ -1,7 +1,7 @@
 import { sendSuccess, sendError } from "../../utils/response.js";
 import { getPaginationParams, buildPaginationMeta } from "../../utils/pagination.js";
 import logger from "../../utils/logger.js";
-import { getOrdersBySellerIdService, createOrderService, getAllOrdersService, getOrderByIdService, updateOrderStatusService } from "./order.service.js";
+import { getOrdersBySellerIdService, createOrderService, getAllOrdersService, getOrderByIdService, updateOrderStatusService, getOrdersByBuyerIdService } from "./order.service.js";
 
 const createOrderController = async (req, res, next) => {
     try {
@@ -47,12 +47,13 @@ const updateOrderStatusController = async (req, res, next) => {
     try {
         const { orderId } = req.params;
         const { status } = req.body;
+        const sellerId = req.user.id;
 
         if (!status) {
             return sendError(res, { statusCode: 400, message: "Status is required" });
         }
 
-        const updatedOrder = await updateOrderStatusService(orderId, status);
+        const updatedOrder = await updateOrderStatusService(orderId, status, sellerId);
         return sendSuccess(res, { statusCode: 200, message: "Order status updated", data: updatedOrder });
     } catch (err) {
         next(err);
@@ -77,10 +78,28 @@ const getOrdersBySellerIdController = async (req, res, next) => {
 
 }
 
+const getOrdersByBuyerIdController = async (req, res, next) => {
+    try {
+        const buyerId = req.user.id;
+        const { page, limit, skip } = getPaginationParams(req.query);
+        const { total, orders } = await getOrdersByBuyerIdService(buyerId, { skip, take: limit });
+
+        return sendSuccess(res, {
+            statusCode: 200,
+            message: "Buyer's orders fetched",
+            data: orders,
+            meta: buildPaginationMeta({ page, limit, total }),
+        });
+    } catch (err) {
+        next(err);
+    }
+};
+
 export {
     createOrderController,
     getOrdersController,
     getOrderByIdController,
     updateOrderStatusController,
-    getOrdersBySellerIdController
+    getOrdersBySellerIdController,
+    getOrdersByBuyerIdController
 };

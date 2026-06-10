@@ -1,13 +1,7 @@
 import { sendError } from "../utils/response.js";
 import logger from "../utils/logger.js";
 
-/**
- * Global Express error-handling middleware.
- * Must be registered LAST in server.js / app.js:
- *   app.use(errorMiddleware);
- *
- * Any controller that calls next(error) will land here.
- */
+
 const errorMiddleware = (err, req, res, next) => {
     // Log the full error stack in development, just the message in production
     logger.error(`Unhandled error on [${req.method}] ${req.originalUrl}`, {
